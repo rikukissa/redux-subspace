@@ -7,7 +7,7 @@
  */
 
 import { createStore } from 'redux'
-import { Cmd, loop, install, combineReducers } from 'redux-loop'
+import { Effects, loop, install, combineReducers } from 'redux-loop'
 import { namespaced } from '../src'
 import { subspace } from 'redux-subspace'
 
@@ -21,7 +21,7 @@ describe('integration tests', () => {
             case TEST_ACTION:
                 return action.value
             case TEST_ACTION_TRIGGER:
-                return loop(state, Cmd.action({type: TEST_ACTION, value: action.value}))
+                return loop(state, Effects.constant({type: TEST_ACTION, value: action.value}))
             default:
                 return state
         }

@@ -7,49 +7,47 @@
  */
 
 import { namespaced as subspaceNamespaced, namespacedAction } from 'redux-subspace'
-import { loop, isLoop, getCmd, getModel } from 'redux-loop'
+import { loop, isLoop, Effects, getModel, getEffect } from 'redux-loop'
 
-function namespacedCommand(namespace) {
+function namespacedEffect(namespace) {
     const actionNamespacer = namespacedAction(namespace);
 
-    return function namespaceCommand(cmd) {
-        if (cmd.type === "RUN") {
-            return {
-                ...cmd,
-                successActionCreator: (...args) => actionNamespacer(cmd.successActionCreator(...args)),
-                failActionCreator: (...args) => actionNamespacer(cmd.failActionCreator(...args))
-            }
+    return function namespaceEffect(effect) {
+
+        if (effect.type === 'PROMISE') {
+            return Effects.promise((...args) =>
+                effect
+                    .factory(...args)
+                    .then(actionNamespacer)
+                    .catch(actionNamespacer),
+                ...effect.args
+            )
         }
 
-        if (cmd.type === "ACTION") {
-            return {
-                ...cmd,
-                actionToDispatch: actionNamespacer(cmd.actionToDispatch)
-            }
+        if (effect.type === 'CONSTANT') {
+            return Effects.constant(actionNamespacer(effect.action))
         }
 
-        if (cmd.type === "BATCH" || cmd.type === "SEQUENCE") {
-            return {
-                ...cmd,
-                cmds: cmd.cmds.map(namespaceCommand)
-            }
+        if (effect.type === 'BATCH') {
+            return Effects.batch(effect.effects.map(namespaceEffect))
         }
 
-        return cmd;
+        return effect
     }
 }
 
 export function namespaced(namespace) {
     const namespacer = subspaceNamespaced(namespace)
-    const commandNamespacer = namespacedCommand(namespace)
+    const sideEffectNamespacer = namespacedEffect(namespace)
+
     return reducer => {
         return namespacer((state, action) => {
             const result = reducer(state, action);
 
             if (isLoop(result)) {
                 const model = getModel(result);
-                const cmd = getCmd(result);
-                return loop(model, commandNamespacer(cmd));
+                const sideEffect = getEffect(result);
+                return loop(model, sideEffectNamespacer(sideEffect));
             }
             return result;
         });

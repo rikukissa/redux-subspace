@@ -27,7 +27,7 @@
     "redux-subspace": "^2.0.3-alpha"
   },
   "peerDependencies": {
-    "redux-loop": "^3.1.2"
+    "redux-loop": ">=2.0.0 <3.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
@@ -43,7 +43,7 @@
     "mocha": "^2.2.5",
     "nyc": "^10.0.0",
     "redux": "^3.6.0",
-    "redux-loop": "^3.1.2",
+    "redux-loop": "^2.2.2",
     "redux-mock-store": "^1.2.1",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
