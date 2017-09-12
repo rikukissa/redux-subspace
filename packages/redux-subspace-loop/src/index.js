@@ -7,6 +7,7 @@
  */
 
 import { namespaced as subspaceNamespaced, namespacedAction } from 'redux-subspace'
+import isGlobal from 'redux-subspace/lib/actions/isGlobal'
 import { loop, isLoop, getCmd, getEffect, getModel } from 'redux-loop'
 
 const IS_REDUX_LOOP_V2 = !getCmd
@@ -87,7 +88,7 @@ export function createNamespacer(isV2) {
         return reducer => {
             return namespacer((state, action) => {
                 const result = reducer(state, action)
-                if (isLoop(result)) {
+                if (isLoop(result) && !isGlobal(action)) {
                     const model = getModel(result)
                     const cmd = getSideEffect(result)
 

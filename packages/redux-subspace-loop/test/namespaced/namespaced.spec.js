@@ -7,7 +7,7 @@
  */
 
 import { getEffect, Cmd, loop, getCmd } from 'redux-loop'
-import { namespacedAction } from 'redux-subspace'
+import { namespacedAction, globalAction } from 'redux-subspace'
 import { namespaced, createNamespacer } from '../../src'
 
 function suppressLoopWarnings() {
@@ -94,6 +94,20 @@ describe('namespaced', () => {
         const expected = loop(
             'initial value',
             Cmd.action(actionNamespacer({type: TEST_ACTION, value: 'foobar'}))
+        )
+        expect(result).to.deep.equal(expected)
+    })
+
+    it('should not namespace global actions', async () => {
+        const namespacedReducer = namespaced('test')(reducer)
+        const result = namespacedReducer(undefined, globalAction({
+            type: TEST_ACTION_TRIGGER,
+            value: 'foobar'
+        }))
+
+        const expected = loop(
+            'initial value',
+            Cmd.action({type: TEST_ACTION, value: 'foobar'})
         )
         expect(result).to.deep.equal(expected)
     })
